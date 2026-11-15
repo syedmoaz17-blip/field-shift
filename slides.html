@@ -1,0 +1,172 @@
+<!doctype html>
+<!-- Field Shift demo deck. Team Indus Orbit, NASA Space Apps Challenge 2026.
+     AI disclosure: slide layout code written with help from an AI coding assistant (Claude, Anthropic);
+     content checked by the team. Screenshots are of our own app. No AI-generated images. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Shift · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ebe8df;--paper:#fffdf8;--ink:#1f2620;--muted:#6a7068;--line:#e6e2d6;--brand:#24533a;--soft:#e7efe7;--accent:#b8862b;--water:#3a6ea5;--soil:#8b5e34;--heat:#b5483f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,Arial,sans-serif;color:var(--ink)}
+.slide{width:min(1120px,calc(100vw - 32px));aspect-ratio:16/9;margin:24px auto;background:var(--paper);border-radius:10px;box-shadow:0 2px 20px rgba(0,0,0,.07);padding:5% 6%;position:relative;overflow:hidden;display:flex;flex-direction:column;container-type:inline-size}
+h1,h2,.serif{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.015em;margin:0}
+h2{font-size:3.9cqw;line-height:1.1;margin-bottom:3cqw;max-width:85%}
+p,li{font-size:1.75cqw;line-height:1.5}
+.kick{font-size:1.15cqw;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4cqw}
+.num{position:absolute;right:6%;bottom:5%;font-size:1.1cqw;color:var(--muted)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:4cqw;align-items:start}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
+.big{font-family:Fraunces,Georgia,serif;font-size:5.2cqw;font-weight:600;line-height:1}
+.fig p{margin:1cqw 0 0;font-size:1.5cqw;color:var(--muted)}
+.fig img{height:31cqw;object-fit:cover;object-position:top}
+td.n+td.n{padding-left:1.6cqw} th:nth-child(3){padding-left:1.6cqw}
+.rule{border-top:1px solid var(--line);padding-top:1.6cqw}
+ul{margin:0;padding-left:2cqw} li{margin:.5cqw 0}
+img{display:block;width:100%;border-radius:.8cqw;border:1px solid var(--line)}
+.dark{background:var(--brand);color:#fff;justify-content:center}
+.dark .kick{color:#e3c27f}
+.dark h1{font-size:8.5cqw;line-height:1}
+.dark .lead{font-size:2.3cqw;line-height:1.4;max-width:70%;opacity:.92;margin:2.4cqw 0 4cqw}
+.dark .who{display:grid;grid-template-columns:repeat(3,auto);gap:4cqw;justify-content:start;font-size:1.5cqw}
+.dark .who b{display:block;font-size:1.05cqw;letter-spacing:.12em;text-transform:uppercase;opacity:.65;font-weight:600;margin-bottom:.5cqw}
+.dark .num{color:rgba(255,255,255,.55)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw;margin-bottom:3cqw}
+.steps div{border-top:2px solid var(--brand);padding-top:1.4cqw}
+.steps b{display:block;font-family:Fraunces,Georgia,serif;font-size:2cqw;margin-bottom:.6cqw}
+.steps span{font-size:1.5cqw;color:var(--muted);line-height:1.45;display:block}
+table{border-collapse:collapse;width:100%;font-size:1.6cqw}
+th{font-weight:500;color:var(--muted);font-size:1.25cqw;text-align:left;padding:0 1.2cqw 1cqw 0;border-bottom:1px solid var(--ink)}
+td{padding:1.2cqw 1.2cqw 1.2cqw 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-family:Fraunces,Georgia,serif;font-size:2.1cqw;font-weight:600;white-space:nowrap}
+.good{color:var(--brand)} .bad{color:var(--heat)}
+.note{font-size:1.15cqw;color:var(--muted);margin-top:auto;max-width:85%}
+@media print{body{background:#fff}.slide{width:100%;margin:0;border-radius:0;box-shadow:none;break-after:page}@page{size:1280px 720px;margin:0}}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide dark">
+  <div class="kick">NASA Space Apps Challenge 2026 · Sahiwal, Pakistan</div>
+  <h1>Field Shift</h1>
+  <p class="lead">A free tool that helps farmers choose crop rotations that use less water, build healthier soil and hold up in the heat, using NASA climate data.</p>
+  <div class="who">
+    <div><b>Team</b>Indus Orbit</div>
+    <div><b>Members</b>Syed Moaz Altaf, Sana Rasheed</div>
+    <div><b>Challenge</b>Field Shift: Adapting Farms with NASA Data</div>
+  </div>
+  <div class="num">1 / 7</div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kick">The problem</div>
+  <h2>Farms in Punjab pump far more water than the sky gives back</h2>
+  <div class="cols3">
+    <div class="rule"><div class="big" style="color:var(--water)">293 mm</div><p>of rain falls in Sahiwal in an average year.</p></div>
+    <div class="rule"><div class="big" style="color:var(--soil)">1,681 mm</div><p>is what the sun and heat pull out of a green field in the same year.</p></div>
+    <div class="rule"><div class="big" style="color:var(--heat)">1,303 mm</div><p>of irrigation a year for rice and wheat, mostly pumped from falling groundwater.</p></div>
+  </div>
+  <p style="margin-top:3cqw;max-width:80%">Most farmers grow the same two cereals every year. The soil loses organic matter, wheat gets hit by March heat, and yearly rain swings from 106 mm to over 1,000 mm. No one gives them a simple way to ask, "What if I rotate differently?"</p>
+  <div class="note">Climate figures: NASA POWER, Sahiwal (30.67 N, 73.11 E). Irrigation: Field Shift estimate.</div>
+  <div class="num">2 / 7</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kick">Our solution</div>
+  <h2>Three questions in, a ranked crop plan out</h2>
+  <div class="steps">
+    <div><b>1. Your farm</b><span>Tap the map. NASA climate data for that exact point loads in seconds.</span></div>
+    <div><b>2. Soil and water</b><span>Soil type, pH, salt, organic matter, canal and tube-well water.</span></div>
+    <div><b>3. Your priorities</b><span>Save water, healthier soil, income, heat and drought safety, animal fodder.</span></div>
+    <div><b>4. The answer</b><span>20 two-year plans ranked, each compared with what you grow now.</span></div>
+  </div>
+  <ul>
+    <li>Every plan shows water saved, soil-health change, free nitrogen from pulses, and heat warnings.</li>
+    <li>A month-by-month crop calendar for both years.</li>
+    <li>Crop names in English and Urdu. Works on a phone, with no login and no install.</li>
+  </ul>
+  <div class="num">3 / 7</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kick">How NASA data makes it work</div>
+  <h2>From satellite data to a farmer's decision</h2>
+  <div class="cols">
+    <div>
+      <p style="margin-top:0"><b>NASA POWER</b> (Langley Research Center) gives us, for any point on Earth:</p>
+      <ul>
+        <li>Temperature and record highs</li>
+        <li>Rainfall, monthly and from 2001 to 2024</li>
+        <li>Sunlight reaching the ground (CERES)</li>
+        <li>Moisture in the root zone (MERRA-2)</li>
+      </ul>
+    </div>
+    <div>
+      <p style="margin-top:0"><b>What we do with it</b></p>
+      <ul>
+        <li>Sunlight and temperature give daily water loss (Hargreaves method).</li>
+        <li>FAO-56 crop factors turn that into each crop's monthly water use.</li>
+        <li>Subtracting NASA rainfall gives the irrigation each plan needs.</li>
+        <li>NASA temperatures are checked against each crop's heat-sensitive weeks.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="num">4 / 7</div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kick">What the farmer sees</div>
+  <h2 style="margin-bottom:2cqw">One screen, one clear answer</h2>
+  <div class="cols" style="grid-template-columns:1.45fr 1fr;gap:2.4cqw">
+    <div class="fig"><img src="assets/shot-plans.jpg" alt="Field Shift: inputs, best-match summary and ranked plans"><p>The best plan for the field, with water saved and soil-health change, then every plan ranked.</p></div>
+    <div class="fig"><img src="assets/shot-climate.jpg" alt="Field Shift: water through the year and NASA climate for the farm"><p>Water use month by month, and the farm's NASA climate.</p></div>
+  </div>
+  <div class="num">5 / 7</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kick">Example · loam field in Sahiwal, average water</div>
+  <h2>Moving away from rice and wheat</h2>
+  <table>
+    <tr><th>Two-year plan</th><th>Irrigation a year</th><th>Soil health</th><th>Why it matters</th></tr>
+    <tr><td>Rice, then wheat (today)</td><td class="n bad">1,303 mm</td><td class="n bad">28</td><td>Puddled rice hardens soil. Wheat is hit by March heat.</td></tr>
+    <tr><td>Sorghum and berseem, then maize and oats</td><td class="n good">741 mm</td><td class="n good">74</td><td>Year-round green fodder for dairy farms.</td></tr>
+    <tr><td>Sorghum and mustard, then mungbean and wheat</td><td class="n good">642 mm</td><td class="n good">76</td><td>Breaks the cereal cycle. Mungbean adds nitrogen.</td></tr>
+    <tr><td>Mungbean and wheat, then sorghum and chickpea</td><td class="n good">616 mm</td><td class="n good">74</td><td>Two pulses save about 1.4 bags of urea per hectare a year.</td></tr>
+  </table>
+  <p style="margin-top:2.4cqw"><b>560 to 690 mm less irrigation a year</b>: about 5,600 to 6,900 cubic metres of water on every hectare.</p>
+  <div class="note">Soil health is a 0 to 100 score. Figures are planning estimates from NASA POWER data and FAO-56. Farmers should confirm with their extension office.</div>
+  <div class="num">6 / 7</div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kick">What comes next</div>
+  <h2>From one field in Sahiwal to farms across the Indus basin</h2>
+  <div class="cols">
+    <ul style="margin-top:0">
+      <li>Add NASA SMAP soil moisture and Landsat and MODIS crop images to read each field's real history.</li>
+      <li>An Urdu and Punjabi voice version for farmers who don't read.</li>
+      <li>Market prices and seasonal forecasts in the income score.</li>
+      <li>A pilot with extension officers and dairy farmers around Sahiwal.</li>
+    </ul>
+    <div class="rule">
+      <div class="serif" style="font-size:3.6cqw;line-height:1.15;color:var(--brand)">Less water.<br>Healthier soil.<br>Safer harvests.</div>
+      <p style="color:var(--muted)">Team Indus Orbit: Syed Moaz Altaf, Sana Rasheed</p>
+    </div>
+  </div>
+  <div class="note">Data: NASA POWER (power.larc.nasa.gov), FAO-56. App code written with help from an AI coding assistant (Claude). No AI-generated images.</div>
+  <div class="num">7 / 7</div>
+</section>
+
+</body>
+</html>

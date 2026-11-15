@@ -1,0 +1,609 @@
+<!doctype html>
+<!--
+  Field Shift: crop rotation planner
+  Team Indus Orbit, NASA Space Apps Challenge 2026, Sahiwal (Pakistan)
+  Challenge: "Field Shift: Adapting Farms with NASA Data"
+
+  AI disclosure (required by Space Apps): this source code was written with help from an
+  AI coding assistant (Claude, Anthropic). The team chose the problem, the approach and the
+  crops and rotations for Punjab, and reviewed the agronomy. Climate data comes from NASA POWER.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Team Indus Orbit">
+<meta name="generator" content="AI-assisted code (Claude, Anthropic), reviewed by Team Indus Orbit">
+<meta name="description" content="Field Shift compares two-year crop plans for any farm using NASA climate data, local soil information and the farmer's own priorities.">
+<title>Field Shift · Crop Rotation Planner</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5ef; --paper:#fffdf8; --ink:#1f2620; --muted:#6a7068; --faint:#9aa098; --line:#e6e2d6;
+  --brand:#24533a; --brand-soft:#e7efe7; --accent:#b8862b;
+  --water:#3a6ea5; --soil:#8b5e34; --money:#b8862b; --heat:#b5483f; --fodder:#4d7c3a;
+  --good:#2f6b45; --warn:#a2541a; --warn-soft:#f8ece0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121512; --paper:#191d19; --ink:#e9ece6; --muted:#a2a99f; --faint:#737a71; --line:#2a302a;
+    --brand:#8cc7a0; --brand-soft:#1f2c22; --accent:#d9ae5c;
+    --water:#7aa8db; --soil:#c9976a; --money:#d9ae5c; --heat:#e0837a; --fodder:#9cc786;
+    --good:#8cc7a0; --warn:#e3a26a; --warn-soft:#2b2219;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121512; --paper:#191d19; --ink:#e9ece6; --muted:#a2a99f; --faint:#737a71; --line:#2a302a;
+  --brand:#8cc7a0; --brand-soft:#1f2c22; --accent:#d9ae5c;
+  --water:#7aa8db; --soil:#c9976a; --money:#d9ae5c; --heat:#e0837a; --fodder:#9cc786;
+  --good:#8cc7a0; --warn:#e3a26a; --warn-soft:#2b2219;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,"Segoe UI",Arial,sans-serif}
+h1,h2,h3,.serif{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+a{color:var(--brand)}
+.ur{font-family:"Noto Nastaliq Urdu",serif;font-size:.85em;color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* top bar + intro */
+.top{border-bottom:1px solid var(--line);background:var(--paper)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;height:60px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:600;color:var(--ink)}
+.logo svg{flex:none}
+.top small{color:var(--muted);font-size:12.5px;text-align:right}
+.intro{padding:44px 0 28px}
+.intro h1{font-size:clamp(30px,4.4vw,46px);line-height:1.08;margin:0 0 12px;max-width:760px}
+.intro p{font-size:17px;color:var(--muted);max-width:680px;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px;font-size:13px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:600}
+
+/* layout */
+.grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;padding-bottom:40px}
+@media (max-width:940px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+.inputs{position:sticky;top:16px}
+@media (max-width:940px){.inputs{position:static}}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.stepno{font:600 11px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+label{display:block;font-size:13px;font-weight:500;margin:14px 0 6px}
+label .hint{font-weight:400;color:var(--faint)}
+select,input[type=number]{width:100%;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#map{height:200px;border-radius:10px;border:1px solid var(--line);z-index:0}
+.places{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.place{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:12.5px;cursor:pointer}
+.place:hover,.place.on{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.status{font-size:12.5px;color:var(--muted);margin-top:10px;display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+.status.ok .dot{background:var(--good)} .status.warn .dot{background:var(--warn)}
+.prio{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;margin-top:12px}
+.prio span{font-size:13.5px}
+.prio output{font-size:12px;color:var(--muted);min-width:64px;text-align:right}
+.prio input{grid-column:1/-1;width:100%;accent-color:var(--brand)}
+
+/* best plan */
+.best{background:var(--brand);color:#fff;border-radius:16px;padding:26px;margin-bottom:18px;position:relative;overflow:hidden}
+:root[data-theme="dark"] .best{color:#0f1a12}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .best{color:#0f1a12}}
+.best .label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.best h2{font-size:clamp(22px,3vw,30px);margin:6px 0 14px;line-height:1.15}
+.best .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+.best .nums b{display:block;font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:600;line-height:1.1}
+.best .nums span{font-size:13px;opacity:.8}
+.best p{margin:16px 0 0;font-size:14px;opacity:.9;max-width:640px}
+
+/* climate */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:6px 0 18px}
+.stat{background:var(--paper);padding:14px 16px}
+.stat b{display:block;font-family:Fraunces,Georgia,serif;font-size:24px;font-weight:600}
+.stat span{font-size:12.5px;color:var(--muted)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:720px){.charts{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+.chartbox{position:relative;height:230px}
+.cap{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.cap b{color:var(--ink);font-weight:600}
+
+/* plans */
+.plan{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;cursor:pointer;background:var(--paper);transition:border-color .15s}
+.plan:hover{border-color:var(--faint)}
+.plan.sel{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.plan-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.plan-head h3{font-size:17px;margin:0;line-height:1.3}
+.plan-meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+.tagcur{display:inline-block;font:500 11px Inter,sans-serif;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.match{text-align:right;flex:none}
+.match b{font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:600;color:var(--brand);line-height:1}
+.match span{display:block;font-size:11px;color:var(--muted)}
+.deltas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.delta{font-size:12.5px;padding:3px 9px;border-radius:6px;background:var(--brand-soft);color:var(--good)}
+.delta.bad{background:var(--warn-soft);color:var(--warn)}
+.scores{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:14px 0 12px}
+@media (max-width:560px){.scores{grid-template-columns:repeat(3,1fr)}}
+.sc span{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+.sc i{display:block;height:5px;border-radius:9px;background:var(--line);margin-top:4px;overflow:hidden}
+.sc i b{display:block;height:100%;border-radius:9px}
+.cal{display:grid;grid-template-columns:repeat(24,1fr);gap:2px}
+.cal div{height:20px;border-radius:3px;background:var(--line)}
+.calm{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;font-size:9.5px;color:var(--faint);text-align:center;margin-top:3px}
+.calkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin-top:8px}
+.calkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.points{list-style:none;margin:12px 0 0;padding:0;font-size:13.5px}
+.points li{padding-left:18px;position:relative;margin:4px 0}
+.points li::before{content:"";position:absolute;left:2px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--good)}
+.points li.w::before{background:var(--warn)}
+.more{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{height:40px;padding:0 16px;border-radius:9px;font:500 14px Inter,sans-serif;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:#fff}
+:root[data-theme="dark"] .btn{color:#0f1a12}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#0f1a12}}
+.btn.ghost{background:transparent;color:var(--brand)}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:6px}
+.how div{font-size:13.5px;color:var(--muted)}
+.how b{display:block;color:var(--ink);font-family:Fraunces,Georgia,serif;font-size:16px;font-weight:600;margin-bottom:4px}
+footer{border-top:1px solid var(--line);padding:22px 0 36px;font-size:12.5px;color:var(--muted)}
+footer p{margin:4px 0}
+@media print{.top,.inputs,.charts,.more,footer .np{display:none!important}.grid{display:block}.plan{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/><path d="M13 21V9M13 13c-3 0-5-2-5-5 3 0 5 2 5 5zm0 3c3 0 5-2 5-5-3 0-5 2-5 5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Field Shift
+    </div>
+    <small>Team Indus Orbit · Sahiwal<br>NASA Space Apps Challenge 2026</small>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="intro">
+    <h1>Which crops should you grow next?</h1>
+    <p>Field Shift compares two-year crop plans for your field. It uses NASA climate data for your exact location, your soil and water, and what matters most to you. It then shows how much water, soil health and income each plan could mean.</p>
+    <div class="facts">
+      <span><b>NASA POWER</b> climate data for any point on Earth</span>
+      <span><b>20</b> crop plans for Punjab</span>
+      <span><b>14</b> crops, names in English and Urdu</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <!-- inputs -->
+    <aside class="inputs">
+      <div class="panel">
+        <div class="stepno">Step 1</div>
+        <h2>Your farm</h2>
+        <p class="sub">Tap the map or pick a district.</p>
+        <div id="map"></div>
+        <div class="places" id="places"></div>
+        <div class="two">
+          <div><label>Latitude</label><input type="number" id="lat" step="0.01" value="30.67"></div>
+          <div><label>Longitude</label><input type="number" id="lon" step="0.01" value="73.11"></div>
+        </div>
+        <div class="status" id="status"><span class="dot"></span><span>Loading NASA data…</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="stepno">Step 2</div>
+        <h2>Soil and water</h2>
+        <p class="sub">Use your soil test if you have one.</p>
+        <label>Soil type</label>
+        <select id="texture">
+          <option value="sandy">Sandy · ریتلی</option>
+          <option value="sandyloam">Sandy loam</option>
+          <option value="loam" selected>Loam · میرا</option>
+          <option value="clayloam">Clay loam</option>
+          <option value="clay">Clay · چکنی</option>
+        </select>
+        <div class="two">
+          <div><label>Soil pH</label><input type="number" id="ph" min="5" max="10" step="0.1" value="8.1"></div>
+          <div><label>Organic matter</label>
+            <select id="om"><option value="low" selected>Low</option><option value="med">Medium</option><option value="high">High</option></select></div>
+        </div>
+        <label>Salt in soil <span class="hint">(کلر)</span></label>
+        <select id="salinity"><option value="0">None</option><option value="1" selected>A little</option><option value="2">Moderate</option><option value="3">High</option></select>
+        <label>Irrigation water per year</label>
+        <select id="water">
+          <option value="0">None, rain only</option>
+          <option value="350">Little (a few canal turns)</option>
+          <option value="700" selected>Average (canal + tube well)</option>
+          <option value="1200">Plenty</option>
+        </select>
+        <label>Tube-well water</label>
+        <select id="gw"><option value="0" selected>Sweet</option><option value="1">Slightly salty</option><option value="2">Salty · کھارا</option></select>
+        <label>What you grow now</label>
+        <select id="current"></select>
+      </div>
+
+      <div class="panel">
+        <div class="stepno">Step 3</div>
+        <h2>What matters to you</h2>
+        <p class="sub">The ranking changes as you move these.</p>
+        <div id="prio"></div>
+        <label style="margin-top:18px">Test a hotter future</label>
+        <select id="warm"><option value="0" selected>Today's climate</option><option value="1">1 °C hotter</option><option value="2">2 °C hotter</option></select>
+      </div>
+    </aside>
+
+    <!-- results -->
+    <main>
+      <div class="best" id="best"></div>
+
+      <div class="panel">
+        <h2>Your plans, ranked</h2>
+        <p class="sub">Each plan covers two years. Tap a plan to see its water use month by month.</p>
+        <div class="calkey" id="calkey"></div>
+        <div id="results"></div>
+        <div class="more">
+          <button class="btn ghost" id="showAll">Show all 20 plans</button>
+          <button class="btn" onclick="window.print()">Print this plan</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Water through the year</h2>
+        <p class="sub" id="detailNote"></p>
+        <div class="chartbox" style="height:250px"><canvas id="waterChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h2>Your farm's climate</h2>
+        <p class="sub">From NASA satellites and climate models for the point you picked.</p>
+        <div class="stats" id="stats"></div>
+        <div class="charts">
+          <div><div class="chartbox"><canvas id="climChart"></canvas></div>
+            <p class="cap"><b>An average year.</b> Bars show rain. The brown line shows how much water the sun and heat pull out of a green field. The gap between them is what crops need from irrigation.</p></div>
+          <div><div class="chartbox"><canvas id="trendChart"></canvas></div>
+            <p class="cap"><b>2001 to 2024.</b> Rain changes a lot from one year to the next, so plans that rely less on rain are safer.</p></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>How it works</h2>
+        <div class="how">
+          <div><b>1. NASA climate</b>Temperature, rain, sunlight and soil moisture for your point come live from NASA POWER.</div>
+          <div><b>2. Crop water</b>Sunlight and heat give the daily water loss. Each crop's needs (FAO-56) give its monthly water use. Rain is taken away to find the irrigation needed.</div>
+          <div><b>3. Heat risk</b>We check each crop's sensitive weeks, such as wheat grain filling in March or cotton flowering in July, against your temperatures.</div>
+          <div><b>4. Your choices</b>Soil, water and your five priorities decide the final ranking.</div>
+        </div>
+        <p class="cap" style="margin-top:16px">Field Shift helps you plan. It does not replace advice. Check varieties and sowing dates with your local agriculture extension office.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><b>Data:</b> NASA POWER Project, NASA Langley Research Center (<a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov</a>), sources MERRA-2 and CERES. Crop water needs: FAO Irrigation and Drainage Paper 56. Map: Leaflet, © OpenStreetMap contributors. Charts: Chart.js.</p>
+    <p class="np"><b>AI disclosure:</b> the code for this app was written with help from an AI coding assistant (Claude, Anthropic) and checked by the team. No AI-generated images are used.</p>
+    <p>Team Indus Orbit: Syed Moaz Altaf, Sana Rasheed. NASA Space Apps Challenge 2026, Sahiwal.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+/* AI-assisted code (Claude, Anthropic), reviewed by Team Indus Orbit. */
+"use strict";
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MK=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+
+/* Saved NASA POWER data for Sahiwal (30.67 N, 73.11 E), used only if the live API cannot be reached. */
+const FALLBACK={
+  clim:{T2M:[13.37,16.8,23.14,29.68,35.51,37.75,36.74,35.3,32.38,27.66,20.96,15.44],
+        PRECTOTCORR:[0.28,0.5,0.8,0.44,0.43,1.26,2.01,1.37,1.44,0.12,0.76,0.21],
+        ALLSKY_SFC_SW_DWN:[10.52,14.78,19.24,23.04,24.7,22.8,20.43,20.03,19.32,16.23,12.27,10.4],
+        RH2M:[38.95,38.73,34.07,27.17,20.79,28.68,40.97,43.96,41.87,29.25,29.38,33.23],
+        GWETROOT:[0.39,0.4,0.4,0.39,0.38,0.39,0.4,0.4,0.41,0.39,0.38,0.39],
+        T2M_MAX:[28.6,35.22,41.55,46.22,50.41,50.45,49.17,46.11,45.99,42.56,37.17,30.12]},
+  years:[2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+  yT2M:[27.67,28.32,27.0,28.15,26.68,27.51,27.27,27.12,27.36,27.53,26.93,26.4,26.93,26.41,26.33,28.04,27.33,27.17,26.46,25.46,26.94,26.81,26.2,27.04],
+  yP:[0.54,0.29,0.72,0.51,0.61,0.63,0.86,0.79,0.67,0.76,0.87,0.65,0.74,0.79,1.05,0.55,0.63,0.66,0.87,2.81,0.67,1.57,1.31,1.19]
+};
+
+/* Crop library for Punjab. Months are calendar indices (0 = Jan).
+   kc: FAO-56 crop coefficient per month in the field. extra: seepage (mm per season).
+   soil: effect on soil health. inc: relative income per season. fod: fodder value.
+   salt / drought: tolerance 1-5. heat: [month, critical mean temperature °C]. nfix: kg N/ha. */
+const CROPS={
+  rice:    {n:"Rice",ur:"دھان",fam:"Grass",c:"#5b8fc7",m:[5,6,7,8,9],kc:[1.05,1.2,1.2,1.1,0.7],extra:250,soil:-8,inc:4,fod:1,salt:3,drought:1,ph:[5.5,8.5],tex:{sandy:.55,sandyloam:.8,loam:.95,clayloam:1,clay:1},heat:[[7,34],[8,33]],nfix:0},
+  wheat:   {n:"Wheat",ur:"گندم",fam:"Grass",c:"#d4a64a",m:[10,11,0,1,2,3],kc:[.5,.75,1.1,1.15,.9,.35],soil:2,inc:3.5,fod:2,salt:3.5,drought:3,ph:[6,8.7],heat:[[2,22],[3,28]],nfix:0},
+  cotton:  {n:"Cotton",ur:"کپاس",fam:"Mallow",c:"#a88bb8",m:[4,5,6,7,8,9,10],kc:[.35,.6,1,1.15,1.1,.8,.4],soil:-2,inc:4,fod:.5,salt:4,drought:3,ph:[6,8.5],heat:[[6,35],[7,35]],nfix:0},
+  maize:   {n:"Maize",ur:"مکئی",fam:"Grass",c:"#e2c25d",m:[6,7,8,9],kc:[.5,1.05,1.15,.7],soil:3,inc:3.5,fod:3,salt:2,drought:2,ph:[5.8,8.3],heat:[[8,32]],nfix:0},
+  sorghum: {n:"Sorghum fodder",ur:"چری",fam:"Grass",c:"#b07a4a",m:[5,6,7,8],kc:[.5,.95,1,.8],soil:2,inc:2,fod:5,salt:4,drought:5,ph:[5.5,8.7],tex:{sandy:.9,sandyloam:1,loam:1,clayloam:.95,clay:.85},heat:[[6,40]],nfix:0},
+  mungK:   {n:"Mungbean",ur:"مونگ",fam:"Legume",c:"#5c9a5e",m:[6,7,8],kc:[.45,1,.8],soil:7,inc:3,fod:1.5,salt:2,drought:4,ph:[6,8.3],tex:{sandy:.9,sandyloam:1,loam:1,clayloam:.85,clay:.7},heat:[[7,37]],nfix:30},
+  mungS:   {n:"Spring mungbean",ur:"بہاری مونگ",fam:"Legume",c:"#7db37f",m:[3,4,5],kc:[.45,1,.75],soil:6,inc:2.5,fod:1.5,salt:2,drought:4,ph:[6,8.3],tex:{sandy:.9,sandyloam:1,loam:1,clayloam:.85,clay:.7},heat:[[5,38]],nfix:25},
+  sesbania:{n:"Sesbania (green manure)",ur:"جنتر",fam:"Legume",c:"#3d6e45",m:[3,4],kc:[.5,.9],soil:12,inc:0,fod:.5,salt:5,drought:3,ph:[6,9.5],heat:[],nfix:80,gm:true},
+  berseem: {n:"Berseem",ur:"برسیم",fam:"Legume",c:"#8fb86a",m:[10,11,0,1,2,3],kc:[.5,.85,1,1.05,1.05,.95],soil:9,inc:3,fod:5,salt:3,drought:2,ph:[6.5,8.5],heat:[[3,31]],nfix:60},
+  chickpea:{n:"Chickpea",ur:"چنا",fam:"Legume",c:"#c4a676",m:[10,11,0,1,2],kc:[.4,.65,.95,1,.6],soil:6,inc:3,fod:1,salt:1,drought:4,ph:[6,8.5],tex:{sandy:.9,sandyloam:1,loam:1,clayloam:.85,clay:.7},heat:[[1,22],[2,25]],nfix:35},
+  mustard: {n:"Mustard",ur:"سرسوں",fam:"Mustard",c:"#e8cf4f",m:[9,10,11,0,1,2],kc:[.4,.7,1,1.05,.8,.35],soil:2,inc:3,fod:1,salt:4,drought:4,ph:[6,8.8],heat:[[1,24]],nfix:0},
+  potato:  {n:"Potato",ur:"آلو",fam:"Nightshade",c:"#9a7259",m:[9,10,11,0],kc:[.5,.95,1.1,.75],soil:-4,inc:5,fod:0,salt:2,drought:1,ph:[5,7.8],tex:{sandy:.85,sandyloam:1,loam:1,clayloam:.8,clay:.6},heat:[[9,26],[10,20]],nfix:0},
+  oats:    {n:"Oats fodder",ur:"جئی",fam:"Grass",c:"#c2b48a",m:[10,11,0,1,2],kc:[.5,.9,1.05,1,.75],soil:3,inc:2,fod:5,salt:3,drought:3,ph:[5.5,8.5],heat:[[2,27]],nfix:0},
+  cane:    {n:"Sugarcane",ur:"گنا",fam:"Grass",c:"#6f8f45",m:[1,2,3,4,5,6,7,8,9,10,11],kc:[.4,.5,.75,.95,1.15,1.25,1.25,1.2,1.1,.95,.8],extra:0,soil:0,inc:8,fod:1.5,salt:2,drought:1,ph:[5,8.5],heat:[],nfix:0}
+};
+const DEF_TEX={sandy:.75,sandyloam:.95,loam:1,clayloam:.95,clay:.8};
+
+/* Two-year plans. seq: [crop, year 0 or 1] */
+const ROTS=[
+ {id:"RW",  n:"Rice, then wheat", seq:[["rice",0],["wheat",0],["rice",1],["wheat",1]], base:true},
+ {id:"CW",  n:"Cotton, then wheat", seq:[["cotton",0],["wheat",0],["cotton",1],["wheat",1]], base:true, late:["wheat"]},
+ {id:"SC",  n:"Sugarcane", seq:[["cane",0],["cane",1]], base:true},
+ {id:"MW",  n:"Maize, then wheat", seq:[["maize",0],["wheat",0],["maize",1],["wheat",1]], base:true},
+ {id:"RBc", n:"Rice, then berseem", seq:[["rice",0],["berseem",0],["rice",1],["berseem",1]], base:true},
+ {id:"SRW", n:"Sesbania before rice, then wheat", seq:[["sesbania",0],["rice",0],["wheat",0],["sesbania",1],["rice",1],["wheat",1]]},
+ {id:"RWMC",n:"Rice and wheat, then maize and chickpea", seq:[["rice",0],["wheat",0],["maize",1],["chickpea",1]]},
+ {id:"RBMW",n:"Rice and berseem, then maize and wheat", seq:[["rice",0],["berseem",0],["maize",1],["wheat",1]]},
+ {id:"CWMW",n:"Cotton and wheat, then mungbean and wheat", seq:[["cotton",0],["wheat",0],["mungK",1],["wheat",1]], late:["wheat@0"]},
+ {id:"CWSB",n:"Cotton and wheat, then sorghum and berseem", seq:[["cotton",0],["wheat",0],["sorghum",1],["berseem",1]], late:["wheat@0"]},
+ {id:"MBMW",n:"Maize and berseem, then maize and wheat", seq:[["maize",0],["berseem",0],["maize",1],["wheat",1]]},
+ {id:"SBMO",n:"Sorghum and berseem, then maize and oats", seq:[["sorghum",0],["berseem",0],["maize",1],["oats",1]]},
+ {id:"MWSC",n:"Mungbean and wheat, then sorghum and chickpea", seq:[["mungK",0],["wheat",0],["sorghum",1],["chickpea",1]]},
+ {id:"PMW", n:"Spring mungbean, maize and wheat every year", seq:[["mungS",0],["maize",0],["wheat",0],["mungS",1],["maize",1],["wheat",1]]},
+ {id:"RMMW",n:"Rice and mustard, then mungbean and wheat", seq:[["rice",0],["mustard",0],["mungK",1],["wheat",1]], late:["mustard"]},
+ {id:"SMMW",n:"Sorghum and mustard, then mungbean and wheat", seq:[["sorghum",0],["mustard",0],["mungK",1],["wheat",1]]},
+ {id:"MPMW",n:"Maize and potato, then mungbean and wheat", seq:[["maize",0],["potato",0],["mungK",1],["wheat",1]], late:["potato"]},
+ {id:"CWSMB",n:"Cotton and wheat, then sesbania, maize and berseem", seq:[["cotton",0],["wheat",0],["sesbania",1],["maize",1],["berseem",1]], late:["wheat@0"]},
+ {id:"RWSRB",n:"Rice and wheat, then sesbania, rice and berseem", seq:[["rice",0],["wheat",0],["sesbania",1],["rice",1],["berseem",1]]},
+ {id:"SCMW",n:"Sorghum and chickpea, then maize and wheat", seq:[["sorghum",0],["chickpea",0],["maize",1],["wheat",1]]}
+];
+
+const PRIO=[
+  {k:"water",n:"Save water",c:"--water",d:3},
+  {k:"soil", n:"Healthier soil",c:"--soil",d:3},
+  {k:"inc",  n:"Income",c:"--money",d:3},
+  {k:"clim", n:"Safe from heat and drought",c:"--heat",d:3},
+  {k:"fod",  n:"Fodder for animals",c:"--fodder",d:2}
+];
+const LEVEL=["Not important","Low","Some","Medium","High","Top"];
+const PLACES=[["Sahiwal",30.67,73.11],["Okara",30.81,73.45],["Pakpattan",30.34,73.39],["Faisalabad",31.42,73.08],["Multan",30.2,71.47],["Bahawalpur",29.4,71.68]];
+
+let CLIM=null, YEARS=null, charts={}, selected=null, showAll=false, map, marker;
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+
+/* ---------- interface ---------- */
+function buildUI(){
+  $("prio").innerHTML=PRIO.map(p=>`<div class="prio"><span>${p.n}</span><output id="o_${p.k}">${LEVEL[p.d]}</output><input type="range" min="0" max="5" step="1" value="${p.d}" id="w_${p.k}" aria-label="${p.n}"></div>`).join("");
+  PRIO.forEach(p=>$("w_"+p.k).addEventListener("input",e=>{$("o_"+p.k).textContent=LEVEL[e.target.value];rank();}));
+  $("current").innerHTML=ROTS.filter(r=>r.base).map(r=>`<option value="${r.id}">${r.n}</option>`).join("");
+  ["texture","ph","om","salinity","water","gw","current","warm"].forEach(id=>$(id).addEventListener("change",()=>{ if(id==="warm") drawClimate(); rank();}));
+  $("places").innerHTML=PLACES.map((p,i)=>`<button class="place ${i===0?'on':''}" data-lat="${p[1]}" data-lon="${p[2]}">${p[0]}</button>`).join("");
+  $("places").addEventListener("click",e=>{const b=e.target.closest(".place"); if(!b) return;
+    document.querySelectorAll(".place").forEach(x=>x.classList.toggle("on",x===b)); setLoc(+b.dataset.lat,+b.dataset.lon);});
+  ["lat","lon"].forEach(id=>$(id).addEventListener("change",()=>setLoc(+$("lat").value,+$("lon").value)));
+  $("showAll").addEventListener("click",()=>{showAll=!showAll;$("showAll").textContent=showAll?"Show top 5 only":"Show all 20 plans";rank();});
+  const used=[...new Set(ROTS.flatMap(r=>r.seq.map(s=>s[0])))];
+  $("calkey").innerHTML=used.map(k=>`<span><i style="background:${CROPS[k].c}"></i>${CROPS[k].n} <span class="ur">${CROPS[k].ur}</span></span>`).join("");
+  try{
+    map=L.map("map",{scrollWheelZoom:false,attributionControl:true}).setView([30.67,73.11],7);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
+    marker=L.circleMarker([30.67,73.11],{radius:8,color:"#24533a",weight:3,fillColor:"#fff",fillOpacity:1}).addTo(map);
+    map.on("click",e=>{document.querySelectorAll(".place").forEach(x=>x.classList.remove("on"));setLoc(+e.latlng.lat.toFixed(2),+e.latlng.lng.toFixed(2));});
+  }catch(e){ $("map").innerHTML='<p class="cap" style="padding:12px">The map could not load. Type your coordinates below.</p>'; }
+}
+function setLoc(lat,lon){
+  if(!isFinite(lat)||!isFinite(lon)) return;
+  $("lat").value=lat; $("lon").value=lon;
+  if(marker){marker.setLatLng([lat,lon]); map.panTo([lat,lon]);}
+  loadNASA(lat,lon);
+}
+function setStatus(cls,msg){const s=$("status"); s.className="status "+cls; s.lastElementChild.textContent=msg;}
+
+/* ---------- NASA POWER ---------- */
+async function loadNASA(lat,lon){
+  setStatus("","Getting NASA data for "+lat+", "+lon+"…");
+  const P="T2M,T2M_MAX,PRECTOTCORR,ALLSKY_SFC_SW_DWN,RH2M,GWETROOT";
+  const base="https://power.larc.nasa.gov/api/temporal/";
+  const get=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();});
+  try{
+    const [c,y]=await Promise.all([
+      get(`${base}climatology/point?parameters=${P}&community=AG&longitude=${lon}&latitude=${lat}&format=JSON`),
+      get(`${base}monthly/point?parameters=T2M,PRECTOTCORR&community=AG&longitude=${lon}&latitude=${lat}&start=2001&end=2024&format=JSON`)
+    ]);
+    const p=c.properties.parameter, clim={};
+    P.split(",").forEach(k=>clim[k]=MK.map(m=>p[k][m]));
+    if(clim.T2M.some(v=>v===-999)) throw new Error("missing values");
+    const q=y.properties.parameter, yrs=[],yt=[],yp=[];
+    for(let yr=2001;yr<=2024;yr++){const t=q.T2M[yr+"13"],r=q.PRECTOTCORR[yr+"13"]; if(t>-999&&r>-999){yrs.push(yr);yt.push(t);yp.push(r);}}
+    CLIM=clim; YEARS={years:yrs,yT2M:yt,yP:yp};
+    setStatus("ok","Live NASA data for "+lat+", "+lon);
+  }catch(e){
+    CLIM=FALLBACK.clim; YEARS=FALLBACK;
+    setStatus("warn","NASA server not reachable. Showing saved NASA data for Sahiwal.");
+  }
+  drawClimate(); rank();
+}
+
+/* ---------- crop and climate model ---------- */
+const warm=()=>+$("warm").value;
+const T=m=>CLIM.T2M[m]+warm();
+const rainMM=m=>CLIM.PRECTOTCORR[m]*DAYS[m];
+/* Hargreaves radiation method, ET0 in mm/day. Rs is in MJ/m²/day (NASA POWER, AG community). */
+const et0=m=>Math.max(0,0.0135*(T(m)+17.8)*CLIM.ALLSKY_SFC_SW_DWN[m]/2.45);
+function rainCV(){const a=YEARS.yP, mu=mean(a); return Math.sqrt(mean(a.map(x=>(x-mu)**2)))/mu;}
+function slope(xs,ys){const mx=mean(xs),my=mean(ys);let n=0,d=0;xs.forEach((x,i)=>{n+=(x-mx)*(ys[i]-my);d+=(x-mx)**2});return n/d;}
+
+function field(){
+  const gw=+$("gw").value;
+  const sal=Math.min(3,+$("salinity").value+(gw>=2?1:gw>=1?0.5:0));
+  return {tex:$("texture").value, ph:+$("ph").value, om:$("om").value, sal, water:+$("water").value};
+}
+function suit(k,f){
+  const c=CROPS[k]; let s=(c.tex||DEF_TEX)[f.tex];
+  if(f.ph<c.ph[0]) s*=1-0.25*(c.ph[0]-f.ph); else if(f.ph>c.ph[1]) s*=1-0.25*(f.ph-c.ph[1]);
+  s*=1-Math.max(0,f.sal-(c.salt-1)*0.75)*0.2;
+  return clamp(s,0.2,1);
+}
+const heatPen=k=>Math.min(0.5,CROPS[k].heat.reduce((s,[m,t])=>s+Math.max(0,T(m)-t)*0.05,0));
+
+function evaluate(rot,f){
+  const Y=2, good=[], warn=[];
+  let water=0, eff=0, et=0, soil=40, inc=0, fod=0, nfix=0, heatSum=0, nCrops=0, lowDrought=0;
+  const monthly=Array(12).fill(0), monthlyEff=Array(12).fill(0);
+  const fams=new Set(), kinds=new Set();
+  let prevFam=null, sameFam=0, riceYears=0;
+  rot.seq.forEach(([k,yr])=>{
+    const c=CROPS[k]; kinds.add(k); fams.add(c.fam);
+    let need=0;
+    c.m.forEach((m,j)=>{
+      const part=(c.m.length>3&&(j===0||j===c.m.length-1))?0.75:1;   // sowing and harvest months are part months
+      const etc=c.kc[j]*et0(m)*DAYS[m]*part;
+      const er=Math.min(etc,0.7*rainMM(m));
+      need+=etc-er; et+=etc; eff+=er; monthly[m]+=etc/Y; monthlyEff[m]+=er/Y;
+    });
+    need+=c.extra||0; water+=need;
+    let sc=c.soil; if(sc>0&&f.om==="low") sc*=1.25; if(sc>0&&f.om==="high") sc*=0.8;
+    if(k==="rice"){riceYears++; if(f.tex==="sandy"||f.tex==="sandyloam") sc-=4;}
+    soil+=sc;
+    if(prevFam&&prevFam===c.fam&&!c.gm) sameFam++;
+    prevFam=c.gm?prevFam:c.fam;
+    const s=suit(k,f), hp=heatPen(k);
+    const isLate=(rot.late||[]).some(x=>x===k||x===k+"@"+yr);
+    inc+=c.inc*s*(1-hp)*(isLate?0.88:1); fod+=c.fod*s*(1-hp);
+    if(!c.gm){heatSum+=hp; nCrops++;}
+    if(c.drought<=1) lowDrought++;
+    nfix+=c.nfix;
+    if(hp>0.08){const ms=c.heat.filter(([m,t])=>T(m)>t).map(([m])=>MONTHS[m]).join(" and ");
+      warn.push(`${c.n} may suffer from heat in ${ms}. Sow on time and choose a heat-tolerant variety.`);}
+    if(s<0.75) warn.push(`${c.n} does not suit this soil well.`);
+    if(isLate) warn.push(`${c.n} goes in late after the previous crop. Use a short-duration variety.`);
+  });
+  soil+=fams.size*4+kinds.size*2-sameFam*3;
+  water/=Y; et/=Y; eff/=Y; inc/=Y; fod/=Y; nfix/=Y;
+  const shortfall=Math.max(0,water-f.water);
+  if(shortfall>0){ const sens=lowDrought?0.8:0.5; inc*=1-Math.min(0.6,(shortfall/Math.max(water,1))*sens); }
+  const cv=rainCV();
+  const scores={
+    water: clamp(100*(1-water/1500)-(shortfall>0?shortfall/12:0)),
+    soil:  clamp(soil),
+    inc:   clamp(inc/9*100),
+    clim:  clamp(100-(heatSum/Math.max(nCrops,1))*250-lowDrought*cv*25-(shortfall>0?shortfall/20:0)+(kinds.size-2)*4),
+    fod:   clamp(fod/8*100)
+  };
+  if(nfix>0) good.push(`Pulses and clover add about ${Math.round(nfix)} kg of nitrogen per hectare a year, which saves about ${(nfix/0.46/50).toFixed(1)} bags of urea.`);
+  if(sameFam===0&&kinds.size>2) good.push("Changing crop families breaks the cycle of pests, weeds and diseases.");
+  if(kinds.size>=4) good.push(`${kinds.size} different crops in two years keep the soil varied and active.`);
+  if(riceYears) warn.push(riceYears===2?"Puddled rice every year uses the most water and hardens the soil.":"Rice in one of the two years still uses a lot of water.");
+  if(shortfall>0) warn.push(`Needs about ${fmt(shortfall)} mm more irrigation a year than you have.`);
+  return {rot,scores,water,et,eff,nfix,good,warn:[...new Set(warn)],monthly,monthlyEff,shortfall};
+}
+function weights(){const w={};PRIO.forEach(p=>w[p.k]=+$("w_"+p.k).value);return w;}
+function overall(s,w){const tw=Object.values(w).reduce((a,b)=>a+b,0)||1;return Object.keys(w).reduce((a,k)=>a+s[k]*w[k],0)/tw;}
+
+/* ---------- drawing ---------- */
+function calendar(rot){
+  const slots=Array(24).fill(null);   // 24 months starting in April of year 1
+  rot.seq.forEach(([k,yr])=>{
+    CROPS[k].m.forEach(m=>{
+      let pos=(m-3+12)%12;
+      if(CROPS[k].m[0]>=8&&m<=3) pos=m+9;   // winter crop: Jan to Apr belong to the next spring
+      pos=(pos+yr*12)%24;
+      if(!slots[pos]) slots[pos]=k;
+    });
+  });
+  const lab=Array.from({length:24},(_,i)=>MONTHS[(i+3)%12][0]);
+  return `<div class="cal">${slots.map(k=>k?`<div style="background:${CROPS[k].c}" title="${CROPS[k].n}"></div>`:`<div title="Empty field"></div>`).join("")}</div>
+          <div class="calm">${lab.map(l=>`<span>${l}</span>`).join("")}</div>`;
+}
+const LBL={water:"Water",soil:"Soil",inc:"Income",clim:"Heat & drought",fod:"Fodder"};
+const COL={water:"--water",soil:"--soil",inc:"--money",clim:"--heat",fod:"--fodder"};
+
+function rank(){
+  if(!CLIM) return;
+  const f=field(), w=weights();
+  const res=ROTS.map(r=>{const e=evaluate(r,f);e.total=overall(e.scores,w);return e;}).sort((a,b)=>b.total-a.total);
+  const cur=res.find(e=>e.rot.id===$("current").value);
+  let list=showAll?res:res.slice(0,5);
+  if(!list.includes(cur)) list=[...list,cur];
+  if(!selected||!res.find(e=>e.rot.id===selected)) selected=res[0].rot.id;
+
+  // best-plan banner
+  const top=res[0]===cur?res[1]:res[0];
+  const saved=cur.water-top.water;
+  $("best").innerHTML=`<div class="label">Best match for your field</div>
+    <h2>${top.rot.n}</h2>
+    <div class="nums">
+      <div><b>${saved>=0?fmt(saved):"+"+fmt(-saved)} mm</b><span>${saved>=0?"less":"more"} irrigation a year than ${cur.rot.n.toLowerCase()}</span></div>
+      <div><b>${Math.round(cur.scores.soil)} → ${Math.round(top.scores.soil)}</b><span>soil health score (out of 100)</span></div>
+      <div><b>${Math.round(top.nfix)} kg</b><span>free nitrogen per hectare a year</span></div>
+    </div>
+    <p>${saved>500?"On one hectare, that is about "+fmt(saved*10)+" cubic metres of water a year, or roughly "+Math.round(saved*10/100)+" hours less tube-well pumping.":"Move the sliders on the left to see other plans for your field."}</p>`;
+
+  $("results").innerHTML=list.map(e=>{
+    const r=e.rot, idx=res.indexOf(e)+1, isCur=e===cur;
+    const dW=Math.round(cur.water-e.water), dS=Math.round(e.scores.soil-cur.scores.soil);
+    const deltas=isCur?"":`<div class="deltas"><span class="delta ${dW<0?'bad':''}">${dW>=0?fmt(dW)+" mm less water":fmt(-dW)+" mm more water"} a year</span><span class="delta ${dS<0?'bad':''}">Soil ${dS>=0?"+":""}${dS}</span></div>`;
+    return `<div class="plan ${r.id===selected?'sel':''}" data-id="${r.id}" tabindex="0">
+      <div class="plan-head"><div><h3>${idx}. ${r.n}${isCur?'<span class="tagcur">What you grow now</span>':''}</h3>
+        <div class="plan-meta">Irrigation needed: about ${fmt(e.water)} mm a year</div></div>
+        <div class="match"><b>${Math.round(e.total)}</b><span>match</span></div></div>
+      ${deltas}
+      <div class="scores">${Object.keys(LBL).map(k=>`<div class="sc"><span>${LBL[k]}<em style="font-style:normal">${Math.round(e.scores[k])}</em></span><i><b style="width:${e.scores[k]}%;background:var(${COL[k]})"></b></i></div>`).join("")}</div>
+      ${calendar(r)}
+      <ul class="points">${e.good.map(n=>`<li>${n}</li>`).join("")}${e.warn.slice(0,3).map(n=>`<li class="w">${n}</li>`).join("")}</ul>
+    </div>`;}).join("");
+  document.querySelectorAll(".plan").forEach(d=>{
+    const pick=()=>{selected=d.dataset.id;rank();};
+    d.addEventListener("click",pick); d.addEventListener("keydown",ev=>{if(ev.key==="Enter")pick();});
+  });
+  drawWater(res.find(e=>e.rot.id===selected),cur);
+}
+
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function mk(id,cfg){ if(charts[id]) charts[id].destroy(); if(window.Chart) charts[id]=new Chart($(id),cfg); }
+function baseOpts(){
+  const ink=css("--muted"), grid=css("--line");
+  return {ink,grid,legend:{labels:{color:ink,usePointStyle:true,pointStyleWidth:14,boxHeight:8,font:{family:"Inter",size:11},
+      generateLabels:c=>Chart.defaults.plugins.legend.labels.generateLabels(c).map(l=>({...l,pointStyle:c.data.datasets[l.datasetIndex].type==="line"?"line":"rectRounded",lineWidth:c.data.datasets[l.datasetIndex].type==="line"?2:0}))}},
+    ax:{ticks:{color:ink,font:{family:"Inter",size:11}},grid:{color:grid},border:{display:false}}};
+}
+function drawClimate(){
+  if(!CLIM) return;
+  const rain=MONTHS.map((_,m)=>rainMM(m)), e0=MONTHS.map((_,m)=>et0(m)*DAYS[m]);
+  const annR=rain.reduce((a,b)=>a+b,0), annE=e0.reduce((a,b)=>a+b,0);
+  const hot=Math.max(...MONTHS.map((_,m)=>T(m))), cv=rainCV();
+  const minY=Math.min(...YEARS.yP)*365, maxY=Math.max(...YEARS.yP)*365;
+  $("stats").innerHTML=[
+    [fmt(annR)+" mm","Rain in an average year"],
+    [fmt(annE)+" mm","Water the sun and heat pull from a field"],
+    [hot.toFixed(1)+" °C","Average of the hottest month"+(warm()?` (+${warm()} °C test)`:"")],
+    [fmt(minY)+"–"+fmt(maxY),"Driest and wettest year since 2001 (mm)"],
+    [Math.round(mean(CLIM.GWETROOT)*100)+"%","Moisture in the root zone"],
+    [Math.max(...CLIM.T2M_MAX).toFixed(1)+" °C","Hottest temperature on record"]
+  ].map(([b,s])=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
+  const o=baseOpts();
+  mk("climChart",{data:{labels:MONTHS,datasets:[
+      {type:"bar",label:"Rain",data:rain,backgroundColor:css("--water"),borderRadius:3,yAxisID:"y"},
+      {type:"line",label:"Water pulled by sun and heat",data:e0,borderColor:css("--soil"),backgroundColor:css("--soil"),pointRadius:0,tension:.35,borderWidth:2.5,yAxisID:"y"},
+      {type:"line",label:"Temperature °C",data:MONTHS.map((_,m)=>T(m)),borderColor:css("--heat"),backgroundColor:css("--heat"),pointRadius:0,borderDash:[4,4],tension:.35,borderWidth:2,yAxisID:"t"}]},
+    options:{maintainAspectRatio:false,plugins:{legend:o.legend},scales:{x:{...o.ax,grid:{display:false}},y:{...o.ax,title:{display:true,text:"mm per month",color:o.ink}},t:{...o.ax,position:"right",grid:{display:false}}}}});
+  mk("trendChart",{data:{labels:YEARS.years,datasets:[
+      {type:"bar",label:"Rain in the year (mm)",data:YEARS.yP.map(x=>Math.round(x*365)),backgroundColor:css("--water"),borderRadius:3}]},
+    options:{maintainAspectRatio:false,plugins:{legend:o.legend},scales:{x:{...o.ax,grid:{display:false},ticks:{...o.ax.ticks,maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:o.ax}}});
+}
+function drawWater(e,cur){
+  if(!e) return;
+  const o=baseOpts();
+  const irr=e.monthly.map((v,i)=>Math.max(0,v-e.monthlyEff[i]));
+  mk("waterChart",{data:{labels:MONTHS,datasets:[
+      {type:"bar",label:"Covered by rain",data:e.monthlyEff,backgroundColor:css("--water"),stack:"a",borderRadius:2},
+      {type:"bar",label:"From irrigation",data:irr,backgroundColor:css("--money"),stack:"a",borderRadius:2},
+      {type:"line",label:"What you grow now",data:cur.monthly,borderColor:css("--heat"),backgroundColor:css("--heat"),pointRadius:0,borderDash:[4,4],tension:.35,borderWidth:2}]},
+    options:{maintainAspectRatio:false,plugins:{legend:o.legend},scales:{x:{...o.ax,stacked:true,grid:{display:false}},y:{...o.ax,stacked:true,title:{display:true,text:"mm per month",color:o.ink}}}}});
+  $("detailNote").textContent=`${e.rot.n}: the crops use about ${fmt(e.et)} mm a year. Rain covers about ${fmt(e.eff)} mm, so about ${fmt(e.water)} mm must come from irrigation (including water lost into the ground). What you grow now needs about ${fmt(cur.water)} mm.`;
+}
+
+buildUI();
+loadNASA(30.67,73.11);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{drawClimate();rank();});
+</script>
+</body>
+</html>
