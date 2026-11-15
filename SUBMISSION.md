@@ -80,6 +80,7 @@ Yes. We used an AI coding assistant (Claude, by Anthropic) to write the HTML, CS
 - Public crop calendars and crop guidance from the Punjab Agriculture Department and the Ayub Agricultural Research Institute, used as background.
 - Leaflet 1.9.4 (BSD-2 licence) and OpenStreetMap map tiles (© OpenStreetMap contributors, ODbL).
 - Chart.js 4.4.1 (MIT licence).
-- Google Fonts: Fraunces, Inter and Noto Nastaliq Urdu (SIL Open Font License).
-- The screenshots in the slides are of our own app. We used no copyrighted images.
+- Google Fonts: Bricolage Grotesque, Inter and Noto Nastaliq Urdu (SIL Open Font License).
+- Photos from Unsplash, used under the free Unsplash License (free to use, credit given): mustard field by William Jones, cracked soil by Mike Erskine, canal through fields by Bernd Dittrich, farmer in a green field by Muhammad Sohail Arif Moeeni.
+- The other screenshots in the slides are of our own app. We used no other copyrighted images.
 - We did not use Space Agency Partner data in this version. We plan to add ESA Sentinel-2 images later.

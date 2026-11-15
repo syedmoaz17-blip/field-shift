@@ -18,32 +18,35 @@
 <title>Field Shift · Crop Rotation Planner</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f7f5ef; --paper:#fffdf8; --ink:#1f2620; --muted:#6a7068; --faint:#9aa098; --line:#e6e2d6;
-  --brand:#24533a; --brand-soft:#e7efe7; --accent:#b8862b;
-  --water:#3a6ea5; --soil:#8b5e34; --money:#b8862b; --heat:#b5483f; --fodder:#4d7c3a;
-  --good:#2f6b45; --warn:#a2541a; --warn-soft:#f8ece0;
+  --bg:#fffaf3; --paper:#ffffff; --ink:#16161d; --muted:#5f5f6e; --faint:#9b9baa; --line:#eee9f2;
+  --brand:#16161d; --brand-soft:#e9fbef; --accent:#7c5cff;
+  --mint:#c6f6d9; --lilac:#e4dbff; --butter:#fff1a6; --peach:#ffd9c4; --sky:#cfe9ff;
+  --water:#4b8dff; --soil:#c27a3e; --money:#e5a400; --heat:#ff6b6b; --fodder:#22b36a;
+  --good:#118a4e; --warn:#c2511a; --warn-soft:#fff0e6;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#121512; --paper:#191d19; --ink:#e9ece6; --muted:#a2a99f; --faint:#737a71; --line:#2a302a;
-    --brand:#8cc7a0; --brand-soft:#1f2c22; --accent:#d9ae5c;
-    --water:#7aa8db; --soil:#c9976a; --money:#d9ae5c; --heat:#e0837a; --fodder:#9cc786;
-    --good:#8cc7a0; --warn:#e3a26a; --warn-soft:#2b2219;
+    --bg:#121218; --paper:#1b1b23; --ink:#f3f1fa; --muted:#a9a8b8; --faint:#73728a; --line:#2c2b38;
+    --brand:#f3f1fa; --brand-soft:#173325; --accent:#a996ff;
+    --mint:#1d3a2a; --lilac:#2c2546; --butter:#3a3417; --peach:#3d2a20; --sky:#1b2d40;
+    --water:#7eaeff; --soil:#e0a26c; --money:#ffcc4d; --heat:#ff8f8f; --fodder:#5ad694;
+    --good:#5ad694; --warn:#ffa36b; --warn-soft:#3a261b;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#121512; --paper:#191d19; --ink:#e9ece6; --muted:#a2a99f; --faint:#737a71; --line:#2a302a;
-  --brand:#8cc7a0; --brand-soft:#1f2c22; --accent:#d9ae5c;
-  --water:#7aa8db; --soil:#c9976a; --money:#d9ae5c; --heat:#e0837a; --fodder:#9cc786;
-  --good:#8cc7a0; --warn:#e3a26a; --warn-soft:#2b2219;
+  --bg:#121218; --paper:#1b1b23; --ink:#f3f1fa; --muted:#a9a8b8; --faint:#73728a; --line:#2c2b38;
+  --brand:#f3f1fa; --brand-soft:#173325; --accent:#a996ff;
+  --mint:#1d3a2a; --lilac:#2c2546; --butter:#3a3417; --peach:#3d2a20; --sky:#1b2d40;
+  --water:#7eaeff; --soil:#e0a26c; --money:#ffcc4d; --heat:#ff8f8f; --fodder:#5ad694;
+  --good:#5ad694; --warn:#ffa36b; --warn-soft:#3a261b;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,"Segoe UI",Arial,sans-serif}
-h1,h2,h3,.serif{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+h1,h2,h3,.serif{font-family:"Bricolage Grotesque",Inter,sans-serif;font-weight:600;letter-spacing:-.01em}
 a{color:var(--brand)}
 .ur{font-family:"Noto Nastaliq Urdu",serif;font-size:.85em;color:var(--muted)}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
@@ -51,7 +54,7 @@ a{color:var(--brand)}
 /* top bar + intro */
 .top{border-bottom:1px solid var(--line);background:var(--paper)}
 .top .wrap{display:flex;justify-content:space-between;align-items:center;height:60px;gap:12px}
-.logo{display:flex;align-items:center;gap:10px;font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:600;color:var(--ink)}
+.logo{display:flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:20px;font-weight:600;color:var(--ink)}
 .logo svg{flex:none}
 .top small{color:var(--muted);font-size:12.5px;text-align:right}
 .intro{padding:44px 0 28px}
@@ -93,14 +96,14 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .best .label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
 .best h2{font-size:clamp(22px,3vw,30px);margin:6px 0 14px;line-height:1.15}
 .best .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
-.best .nums b{display:block;font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:600;line-height:1.1}
+.best .nums b{display:block;font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:28px;font-weight:600;line-height:1.1}
 .best .nums span{font-size:13px;opacity:.8}
 .best p{margin:16px 0 0;font-size:14px;opacity:.9;max-width:640px}
 
 /* climate */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:6px 0 18px}
 .stat{background:var(--paper);padding:14px 16px}
-.stat b{display:block;font-family:Fraunces,Georgia,serif;font-size:24px;font-weight:600}
+.stat b{display:block;font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:24px;font-weight:600}
 .stat span{font-size:12.5px;color:var(--muted)}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media (max-width:720px){.charts{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
@@ -117,7 +120,7 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .plan-meta{font-size:12.5px;color:var(--muted);margin-top:3px}
 .tagcur{display:inline-block;font:500 11px Inter,sans-serif;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:2px}
 .match{text-align:right;flex:none}
-.match b{font-family:Fraunces,Georgia,serif;font-size:28px;font-weight:600;color:var(--brand);line-height:1}
+.match b{font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:28px;font-weight:600;color:var(--brand);line-height:1}
 .match span{display:block;font-size:11px;color:var(--muted)}
 .deltas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .delta{font-size:12.5px;padding:3px 9px;border-radius:6px;background:var(--brand-soft);color:var(--good)}
@@ -143,9 +146,70 @@ select:focus,input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .btn.ghost{background:transparent;color:var(--brand)}
 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:6px}
 .how div{font-size:13.5px;color:var(--muted)}
-.how b{display:block;color:var(--ink);font-family:Fraunces,Georgia,serif;font-size:16px;font-weight:600;margin-bottom:4px}
+.how b{display:block;color:var(--ink);font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:16px;font-weight:600;margin-bottom:4px}
 footer{border-top:1px solid var(--line);padding:22px 0 36px;font-size:12.5px;color:var(--muted)}
 footer p{margin:4px 0}
+/* ---- light pastel theme ---- */
+h1,h2,h3,.serif{font-weight:700;letter-spacing:-.025em}
+.top{background:rgba(255,250,243,.85);backdrop-filter:blur(8px);border-bottom:0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .top{background:rgba(18,18,24,.85)}}
+:root[data-theme="dark"] .top{background:rgba(18,18,24,.85)}
+.logo{font-weight:800;font-size:21px}
+.logo svg{color:var(--fodder)}
+.intro{display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;padding:36px 0 34px}
+@media (max-width:860px){.intro{grid-template-columns:1fr;gap:22px}}
+.intro h1{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-.04em;font-weight:800}
+.intro h1 em{font-style:normal;background:linear-gradient(transparent 58%,var(--butter) 58%);padding:0 4px}
+.intro p{font-size:17px}
+.facts{gap:8px}
+.facts span{background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:7px 13px}
+.facts span:nth-child(1){background:var(--mint);border-color:transparent}
+.facts span:nth-child(2){background:var(--lilac);border-color:transparent}
+.facts span:nth-child(3){background:var(--peach);border-color:transparent}
+.facts b{color:var(--ink)}
+.hero{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:4/3;background:var(--butter)}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.sticker{position:absolute;background:var(--paper);color:var(--ink);border-radius:16px;padding:10px 14px;font-size:13px;box-shadow:0 8px 24px rgba(22,22,29,.12);line-height:1.3}
+.sticker b{display:block;font-family:"Bricolage Grotesque",Inter,sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.sticker.s1{left:16px;bottom:18px;transform:rotate(-3deg);background:var(--mint)}
+.sticker.s2{right:16px;top:18px;transform:rotate(3deg);background:var(--lilac)}
+.credit{position:absolute;right:12px;bottom:10px;font-size:10.5px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.credit a{color:#fff}
+.panel{border-radius:22px;border-color:var(--line);box-shadow:0 1px 0 rgba(22,22,29,.03)}
+.stepno{display:inline-block;color:var(--ink);background:var(--butter);border-radius:99px;padding:3px 10px;letter-spacing:.06em;margin-bottom:8px}
+.inputs .panel:nth-child(2) .stepno{background:var(--sky)}
+.inputs .panel:nth-child(3) .stepno{background:var(--peach)}
+select,input[type=number]{border-radius:12px;background:var(--bg)}
+select:focus,input:focus{outline-color:var(--accent)}
+#map{border-radius:16px}
+.place.on,.place:hover{background:var(--lilac);border-color:transparent;color:var(--ink)}
+.prio input{accent-color:var(--accent)}
+.best{background:linear-gradient(135deg,var(--mint),var(--sky) 55%,var(--lilac));color:var(--ink);border-radius:26px;padding:28px}
+.best .label{opacity:1;display:inline-block;background:var(--paper);border-radius:99px;padding:4px 11px;font-weight:600;font-size:11px}
+.best h2{font-weight:800;letter-spacing:-.03em}
+.best .nums b{font-weight:800;font-size:32px;letter-spacing:-.03em}
+.best .nums span{opacity:.75}
+.best p{opacity:.85}
+:root[data-theme="dark"] .best{color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .best{color:var(--ink)}}
+.stats{border-radius:18px}
+.stat b{font-weight:800;letter-spacing:-.02em}
+.plan{border-radius:18px}
+.plan.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--lilac)}
+.plan-head h3{font-weight:700;letter-spacing:-.015em}
+.match b{font-weight:800;color:var(--accent)}
+.delta{border-radius:99px;background:var(--mint);color:var(--ink)}
+.delta.bad{background:var(--peach);color:var(--ink)}
+.tagcur{background:var(--butter);border-color:transparent;color:var(--ink);border-radius:99px;padding:1px 8px}
+.sc i{height:7px}
+.cal div{border-radius:5px}
+.btn{border-radius:99px;background:var(--ink);border-color:var(--ink);color:var(--bg)}
+:root[data-theme="dark"] .btn{color:var(--bg)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:var(--bg)}}
+.btn.ghost{background:transparent;color:var(--ink)}
+.how div{background:var(--bg);border-radius:16px;padding:14px}
+.how div:nth-child(1){background:var(--mint)}.how div:nth-child(2){background:var(--sky)}.how div:nth-child(3){background:var(--peach)}.how div:nth-child(4){background:var(--lilac)}
+.how div{color:var(--ink)}
 @media print{.top,.inputs,.charts,.more,footer .np{display:none!important}.grid{display:block}.plan{break-inside:avoid}}
 </style>
 </head>
@@ -163,13 +227,21 @@ footer p{margin:4px 0}
 
 <div class="wrap">
   <section class="intro">
-    <h1>Which crops should you grow next?</h1>
-    <p>Field Shift compares two-year crop plans for your field. It uses NASA climate data for your exact location, your soil and water, and what matters most to you. It then shows how much water, soil health and income each plan could mean.</p>
+   <div>
+    <h1>Which crops should you grow <em>next?</em></h1>
+    <p style="margin-top:14px">Field Shift compares two-year crop plans for your field. It uses NASA climate data for your exact location, your soil and water, and what matters most to you. It then shows how much water, soil health and income each plan could mean.</p>
     <div class="facts">
       <span><b>NASA POWER</b> climate data for any point on Earth</span>
       <span><b>20</b> crop plans for Punjab</span>
       <span><b>14</b> crops, names in English and Urdu</span>
     </div>
+   </div>
+   <div class="hero">
+     <img src="https://images.unsplash.com/photo-1590701068745-481e93a21cf4?w=1200&q=80&auto=format&fit=crop" alt="A mustard field in bloom under a blue sky">
+     <div class="sticker s2"><b>NASA</b>climate data, live</div>
+     <div class="sticker s1"><b>−560 mm</b>water a year, Sahiwal example</div>
+     <span class="credit">Photo: <a href="https://unsplash.com/photos/yellow-flower-field-under-blue-sky-during-daytime-5hgdidNUAds" target="_blank" rel="noopener">William Jones</a> / Unsplash</span>
+   </div>
   </section>
 
   <div class="grid">
@@ -279,7 +351,7 @@ footer p{margin:4px 0}
 
 <footer>
   <div class="wrap">
-    <p><b>Data:</b> NASA POWER Project, NASA Langley Research Center (<a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov</a>), sources MERRA-2 and CERES. Crop water needs: FAO Irrigation and Drainage Paper 56. Map: Leaflet, © OpenStreetMap contributors. Charts: Chart.js.</p>
+    <p><b>Data:</b> NASA POWER Project, NASA Langley Research Center (<a href="https://power.larc.nasa.gov" target="_blank" rel="noopener">power.larc.nasa.gov</a>), sources MERRA-2 and CERES. Crop water needs: FAO Irrigation and Drainage Paper 56. Map: Leaflet, © OpenStreetMap contributors. Charts: Chart.js. Photo: William Jones on Unsplash (Unsplash License).</p>
     <p class="np"><b>AI disclosure:</b> the code for this app was written with help from an AI coding assistant (Claude, Anthropic) and checked by the team. No AI-generated images are used.</p>
     <p>Team Indus Orbit: Syed Moaz Altaf, Sana Rasheed. NASA Space Apps Challenge 2026, Sahiwal.</p>
   </div>
@@ -385,7 +457,7 @@ function buildUI(){
   try{
     map=L.map("map",{scrollWheelZoom:false,attributionControl:true}).setView([30.67,73.11],7);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
-    marker=L.circleMarker([30.67,73.11],{radius:8,color:"#24533a",weight:3,fillColor:"#fff",fillOpacity:1}).addTo(map);
+    marker=L.circleMarker([30.67,73.11],{radius:8,color:"#7c5cff",weight:3,fillColor:"#fff",fillOpacity:1}).addTo(map);
     map.on("click",e=>{document.querySelectorAll(".place").forEach(x=>x.classList.remove("on"));setLoc(+e.latlng.lat.toFixed(2),+e.latlng.lng.toFixed(2));});
   }catch(e){ $("map").innerHTML='<p class="cap" style="padding:12px">The map could not load. Type your coordinates below.</p>'; }
 }

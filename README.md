@@ -22,6 +22,7 @@ Open `index.html` in a browser. Nothing to install. Live NASA data needs an inte
 - NASA POWER Project, NASA Langley Research Center: https://power.larc.nasa.gov (MERRA-2, CERES).
 - FAO Irrigation and Drainage Paper 56: crop coefficients.
 - Leaflet and © OpenStreetMap contributors, Chart.js, Google Fonts.
+- Photos (Unsplash License): William Jones, Mike Erskine, Bernd Dittrich, Muhammad Sohail Arif Moeeni, all via unsplash.com.
 
 ## AI disclosure
 The code for the app and the slides was written with help from an AI coding assistant (Claude, by Anthropic) and checked by the team. The team chose the problem, the approach and the crop plans. No AI-generated images, audio or video are used.
